@@ -17,6 +17,13 @@ pub enum BandwidthLimit {
     Limited(u32),
 }
 
+#[derive(Debug, Clone, Copy)]
+/// Represents a compressor
+pub enum Compressor {
+    /// RangeCoder compressor
+    RangeCoder,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 /// Represents a channel limit or unlimited.
 pub enum ChannelLimit {
@@ -282,6 +289,21 @@ impl<T> Host<T> {
             self.peer_id(res)
         }))
     }
+
+    pub fn set_compressor(&mut self, compressor: Compressor) -> i32{
+
+        let mut err = 0;
+
+        match compressor {
+            Compressor::RangeCoder => {
+                err = enet_host_compress_with_range_coder(self.inner);
+            },
+            _ => {}
+        }
+
+        err
+    }
+
 }
 
 impl<T> Drop for Host<T> {
