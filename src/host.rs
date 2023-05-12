@@ -24,6 +24,13 @@ pub enum Compressor {
     RangeCoder,
 }
 
+#[derive(Debug, Clone, Copy)]
+/// Represents a checksum function
+pub enum Checksum {
+    /// Crc32 checksum function
+    Crc32,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 /// Represents a channel limit or unlimited.
 pub enum ChannelLimit {
@@ -302,6 +309,17 @@ impl<T> Host<T> {
         }
 
         err
+    }
+
+    pub fn set_checksum(&mut self, checksum: Checksum) -> () {
+
+        match Checksum {
+            Checksum::Crc32 => {
+              self.inner.checksum = enet_crc32;
+            },
+            _=>{}
+        }
+
     }
 
 }
