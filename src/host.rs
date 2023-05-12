@@ -84,6 +84,10 @@ impl<T> Host<T> {
     pub(in crate) fn new(_keep_alive: Arc<EnetKeepAlive>, inner: *mut ENetHost) -> Host<T> {
         assert!(!inner.is_null());
 
+        unsafe {
+            (*inner).usingNewPacketForServer = 1;
+        }
+
         Host {
             inner,
             _keep_alive,
@@ -299,9 +303,10 @@ impl<T> Host<T> {
         }))
     }
 
+    /// set enet compressor
     pub fn set_compressor(&mut self, compressor: Compressor) -> i32 {
 
-        let mut err = 0;
+        let mut err;
 
         match compressor {
             Compressor::RangeCoder => unsafe {
@@ -312,6 +317,7 @@ impl<T> Host<T> {
         err
     }
 
+    /// set enet checksum
     pub fn set_checksum(&mut self, checksum: Checksum) -> () {
 
         match checksum {
