@@ -1,10 +1,12 @@
 use std::{marker::PhantomData, mem::MaybeUninit, sync::Arc, time::Duration};
 
-use enet_sys::{
-    enet_host_bandwidth_limit, enet_host_channel_limit, enet_host_check_events, enet_host_connect,
-    enet_host_destroy, enet_host_flush, enet_host_service, ENetEvent, ENetHost, ENetPeer,
-    ENET_PROTOCOL_MAXIMUM_CHANNEL_COUNT,
-};
+// use enet_sys::{
+//     enet_host_bandwidth_limit, enet_host_channel_limit, enet_host_check_events, enet_host_connect,
+//     enet_host_destroy, enet_host_flush, enet_host_service, ENetEvent, ENetHost, ENetPeer,
+//     ENET_PROTOCOL_MAXIMUM_CHANNEL_COUNT, enet_host_compress_with_range_coder
+// };
+
+use enet_sys::*;
 
 use crate::{Address, EnetKeepAlive, Error, Event, Peer, PeerID};
 
@@ -297,15 +299,14 @@ impl<T> Host<T> {
         }))
     }
 
-    pub fn set_compressor(&mut self, compressor: Compressor) -> i32{
+    pub fn set_compressor(&mut self, compressor: Compressor) -> i32 {
 
         let mut err = 0;
 
         match compressor {
-            Compressor::RangeCoder => {
+            Compressor::RangeCoder => unsafe {
                 err = enet_host_compress_with_range_coder(self.inner);
-            },
-            _ => {}
+            }
         }
 
         err
@@ -313,11 +314,10 @@ impl<T> Host<T> {
 
     pub fn set_checksum(&mut self, checksum: Checksum) -> () {
 
-        match Checksum {
-            Checksum::Crc32 => {
-              self.inner.checksum = enet_crc32;
-            },
-            _=>{}
+        match checksum {
+            Checksum::Crc32 => unsafe {
+                (*self.inner).checksum = Some(enet_crc32);
+            }
         }
 
     }
